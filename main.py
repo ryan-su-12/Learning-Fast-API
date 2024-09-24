@@ -1,5 +1,11 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from typing import Optional
 from routes.route import router
 from dotenv import load_dotenv
 
@@ -8,14 +14,16 @@ app = FastAPI()
 
 app.include_router(router)
 
+# Models for the API
+class User(BaseModel):
+    username: str
 
-from pymongo.mongo_client import MongoClient
-uri = os.getenv("MONGODB_URI")
+class UserInDB(User):
+    hashed_password: str
 
-client = MongoClient(uri)
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-try:
-    client.admin.command('ping')
-    print("You have successfully connected to MongoDB!")
-except Exception as e:
-        print(e)
+class TokenData(BaseModel):
+    username: Optional[str] = None
