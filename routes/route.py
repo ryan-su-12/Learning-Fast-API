@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from models.todos import Todo
+from models.Finances import Finances
 from config.database import collection_name
+from config.database import finance_collection
 from schema.schemas import list_serial
 from bson import ObjectId
 
@@ -26,3 +28,13 @@ async def put_todo(id: str, todo: Todo):
 @router.delete("/{id}")
 async def delete_todo(id: str):
     collection_name.find_one_and_delete({"_id": ObjectId(id)})
+
+#### Finances section
+@router.get("/finances")
+async def get_finances():
+    Finances = list_serial(finance_collection.find())
+    return Finances
+
+@router.post("/finaces")
+async def post_finances(finances: Finances):
+    finance_collection.insert_one(dict(finances))
